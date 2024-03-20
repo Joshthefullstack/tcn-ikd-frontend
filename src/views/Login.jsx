@@ -6,23 +6,44 @@ import { Link } from "react-router-dom";
 
 const Login = () => {
 
-  const [emailValue, setEmailValue] = useState("");
-  const [passwordValue, setPasswordValue] = useState("");
+  const [loginForm, setLoginForm] = useState({
+    email: { value: "", error: "" },
+    password: { value: "", error: "" }
+  });
 
-  const handleEmailChange = (event) => {
-    setEmailValue(event.target.value);
-  }
-
-  const handlePasswordChange = (event) => {
-    setPasswordValue(event.target.value);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setLoginForm({ ...loginForm, [name]: { ...loginForm[name], value } });
   }
 
   const handleButtonClick = () => {
-    const loginDetails = {
-      email: emailValue,
-      password: passwordValue,
+    let hasError = false;
+    const updatedLoginForm = { ...loginForm };
+
+    Object.keys(updatedLoginForm).forEach((key) => {
+      const { value } = updatedLoginForm[key];
+
+      if(key === "email") {
+        if(!value.includes("@") && !value.includes(".com")){
+          updatedLoginForm[key].error = "Invalid email";
+          hasError = true;
+        }
+      }
+
+      if (!value.trim() || value === "0") {
+        updatedLoginForm[key].error = `${key} is required`;
+        hasError = true;
+      } else {
+        updatedLoginForm[key].error = "";
+      }
+    });
+
+    if (hasError) {
+      setLoginForm(updatedLoginForm);
+      return;
     }
-    console.log(loginDetails);
+
+    console.log(updatedLoginForm);
   }
   
   return (
@@ -40,8 +61,8 @@ const Login = () => {
               <Form.Control
                 type="email"
                 placeholder="Enter First Email"
-                value={emailValue}
-                onChange={handleEmailChange}
+                value={loginForm.email.value}
+                onChange={handleChange}
               />
             </Form.Group>
 
@@ -50,8 +71,8 @@ const Login = () => {
               <Form.Control
                 type="password"
                 placeholder="Password"
-                value={passwordValue}
-                onChange={handlePasswordChange}
+                value={loginForm.password.value}
+                onChange={handleChange}
               />
             </Form.Group>
 

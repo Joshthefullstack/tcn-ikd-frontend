@@ -1,81 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import style from "../styles/Registration.module.css";
 import logo from "../assets/_6rtmJ20_400x400-removebg-preview.png";
-import women_hugging from "../assets/wond.jpg"
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { Link } from "react-router-dom";
+import { Axios } from "axios";
 
 const Registration = () => {
-
-  // const [formData, setFormData] = useState({
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   password: "",
-  //   phoneNumber: "",
-  //   gender: "0",
-  //   ageBracket: "0",
-  //   attendantType: "0",
-  //   occupation: "0",
-  // });
-  // const [error, setError] = useState("");
-
-  // const handleChange = (event) => {
-  //   const { name, value } = event.target;
-  //   setFormData({ ...formData, [name]: value });
-  // };
-
-  // const handleButtonClick = () => {
-  //   const { firstName, lastName, email, password, phoneNumber, gender, ageBracket, attendantType, occupation } = formData;
-
-  //   if(firstName.length < 2 || firstName.length > 50){
-  //      setError("First Name must be between 2 and 50 characters");
-  //      return
-  //   }
-
-  //   if(lastName.length < 2 || lastName.length > 50){
-  //      setError("Last Name must be between 2 and 50 characters");
-  //      return
-  //   }
-
-  //   if(!email.includes("@") || !email.includes(".com")){
-  //     return setError("Invalid Email");
-  //   }
-
-  //   if(password.length < 6){
-  //     return setError("Password should have at least 6 characters");
-  //   };
-
-  //   if(phoneNumber.length < 11 || phoneNumber.length > 11){
-  //     return setError("Phone number must be 11 characters");
-  //   };
-
-  //   if(gender === "0"){
-  //     return setError("Please select gender");
-  //   }
-
-  //   if(ageBracket === "0"){
-  //     return setError("Please select age bracket");
-  //   }
-
-  //   if(attendantType === "0"){
-  //     return("Please select attendant type");
-  //   }
-
-  //   if(occupation === "0"){
-  //     return("Please select occupation");
-  //   }
-
-
-  //   const ftDetails = { firstName, lastName, email, password, phoneNumber, gender, ageBracket, attendantType, occupation };
-  //   console.log(ftDetails);
-  //   setError("");
-
-  // }
 
   const [formData, setFormData] = useState({
     firstName: { value: "", error: "" },
@@ -100,11 +34,30 @@ const Registration = () => {
 
     Object.keys(updatedFormData).forEach((key) => {
       const { value } = updatedFormData[key];
-      if (!value.trim() || value === "0") {
-        updatedFormData[key].error = `${key} is required`;
+
+      if(key === "email" && !value.includes("@") && !value.includes(".com")){
+        updatedFormData[key].error = "Invalid email";
         hasError = true;
-      } else {
+      }
+      else{
         updatedFormData[key].error = "";
+      }
+
+      if(key === "phoneNumber" && value.length !== 11){
+        updatedFormData[key].error = "Invalid phone number";
+        hasError = true;
+      }
+      else {
+        updatedFormData[key].error = "";
+      }
+      
+      if(key !== "email" && key !== "phoneNumber"){
+        if (!value.trim() || value === "0") {
+          updatedFormData[key].error = `${key} is required`;
+          hasError = true;
+        } else {
+          updatedFormData[key].error = "";
+        }
       }
     });
 
@@ -123,7 +76,6 @@ const Registration = () => {
       <div className={style.first_half}>
         <img src={logo} alt="" />
       </div>
-      {/* <img src={women_hugging} alt="" /> */}
       <div className={style.second_half}>
         <h1 className={style.title}>First Timers Registration</h1>
         <Form>
@@ -135,6 +87,7 @@ const Registration = () => {
                 placeholder="Enter First Name"
                 value={formData.firstName.value}
                 onChange={handleChange}
+                name={"firstName"}
               />
               {formData.firstName.error.length > 0 ? <p className={style.error}>{formData.firstName.error}</p> : ""}
             </Form.Group>
@@ -146,6 +99,7 @@ const Registration = () => {
                 placeholder="Last Name"
                 value={formData.lastName.value}
                 onChange={handleChange}
+                name={"lastName"}
               />
               {formData.lastName.error.length > 0 ? <p className={style.error}>{formData.lastName.error}</p> : ""}
             </Form.Group>
@@ -159,6 +113,7 @@ const Registration = () => {
                 placeholder="Enter Email"
                 value={formData.email.value}
                 onChange={handleChange}
+                name={"email"}
               />
               {formData.email.error.length > 0 ? <p className={style.error}>{formData.email.error}</p> : ""}
             </Form.Group>
@@ -170,6 +125,7 @@ const Registration = () => {
                 placeholder="Password"
                 value={formData.password.value}
                 onChange={handleChange}
+                name={"password"}
               />
               {formData.password.error.length > 0 ? <p className={style.error}>{formData.password.error}</p> : ""}
             </Form.Group>
@@ -182,6 +138,7 @@ const Registration = () => {
               placeholder="Phone Number"
               value={formData.phoneNumber.value}
               onChange={handleChange}
+              name={"phoneNumber"}
             />
             {formData.phoneNumber.error.length > 0 ? <p className={style.error}>{formData.phoneNumber.error}</p> : ""}
           </Form.Group>
@@ -191,6 +148,7 @@ const Registration = () => {
               <Form.Select
                 value={formData.gender.value}
                 onChange={handleChange}
+                name={"gender"}
                 aria-label="Default select example"
               >
                 <option value="0">Gender</option>
@@ -203,6 +161,7 @@ const Registration = () => {
               <Form.Select
                 value={formData.ageBracket.value}
                 onChange={handleChange}
+                name={"ageBracket"}
                 aria-label="Default select example"
               >
                 <option value="0">Age Bracket</option>
@@ -219,13 +178,14 @@ const Registration = () => {
               <Form.Select
                 value={formData.attendantType.value}
                 onChange={handleChange}
+                name={"attendantType"}
                 aria-label="Default select example"
               >
                 <option value="0">Attendant Type</option>
                 <option value="1">New Member</option>
-                <option value="1">Visiting</option>
-                <option value="1">Undecided</option>
-                <option value="1">TCN Member (Another Campus)</option>
+                <option value="2">Visiting</option>
+                <option value="3">Undecided</option>
+                <option value="4">TCN Member (Another Campus)</option>
               </Form.Select>
               {formData.attendantType.error.length > 0 ? <p className={style.error}>{formData.attendantType.error}</p> : ""}
             </Form.Group>
@@ -233,6 +193,7 @@ const Registration = () => {
               <Form.Select
                 value={formData.occupation.value}
                 onChange={handleChange}
+                name={"occupation"}
                 aria-label="Default select example"
               >
                 <option value="0">Occupation</option>
