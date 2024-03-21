@@ -19,56 +19,30 @@ const RegistrationForm = () => {
   });
 
   const checkVal = ({ name, value }) => {
-    if (name.startsWith("txt")) {
-      if (value.trim().length < 4) {
-        return `Invalid ${name.slice(3)}`;
-      }
-      return "";
+    switch (true) {
+      case name.startsWith("txt"):
+        return value.trim().length < 4 ? `Invalid ${name.slice(3)}` : "";
+      case name.startsWith("ddl"):
+        return value === "0" ? `Invalid ${name.slice(3)}` : "";
+      case name === "email":
+        return value.trim().length < 5 ||
+          !value.includes("@") ||
+          !value.includes(".")
+          ? `Invalid ${name}`
+          : "";
+      case name === "password":
+        return value.trim().length < 6 ? `Invalid ${name}` : "";
+      case name === "phoneNumber":
+        return value.trim().length < 11 ? `Invalid ${name}` : "";
+      case name === "confirmPassword":
+        return value.trim().length < 6
+          ? `Invalid ${name}`
+          : formData.password.value.trim() !== value.trim()
+          ? `Passwords aren't matching`
+          : "";
+      default:
+        return "Unknown Error";
     }
-
-    if (name.startsWith("ddl")) {
-      if (value === "0") {
-        return `Invalid ${name.slice(3)}`;
-      }
-      return "";
-    }
-
-    if (name === "email") {
-      if (
-        value.trim().length < 5 ||
-        !value.includes("@") ||
-        !value.includes(".")
-      ) {
-        return `Invalid ${name}`;
-      }
-      return "";
-    }
-
-    if (name === "password") {
-      if (value.trim().length < 6) {
-        return `Invalid ${name}`;
-      }
-      return "";
-    }
-
-    if (name === "phoneNumber") {
-      if (value.trim().length < 11) {
-        return `Invalid ${name}`;
-      }
-      return "";
-    }
-
-    if (name === "confirmPassword") {
-      if (value.trim().length < 6) {
-        return `Invalid ${name}`;
-      }
-      if (formData.password.value.trim() !== value.trim()) {
-        return `Passwords aren't matching`;
-      }
-      return "";
-    }
-
-    return "Unknown Error";
   };
 
   const handleChange = (event) => {
@@ -133,7 +107,7 @@ const RegistrationForm = () => {
             formData={formData.txtFirstName.value}
             handleChange={handleChange}
             name={"txtFirstName"}
-            type={'text'}
+            type={"text"}
             error={formData.txtFirstName.error}
           />
 
@@ -144,7 +118,7 @@ const RegistrationForm = () => {
             formData={formData.txtLastName.value}
             handleChange={handleChange}
             name={"txtLastName"}
-            type={'text'}
+            type={"text"}
             error={formData.txtLastName.error}
           />
         </Row>
@@ -157,7 +131,7 @@ const RegistrationForm = () => {
             formData={formData.email.value}
             handleChange={handleChange}
             name={"email"}
-            type={'email'}
+            type={"email"}
             error={formData.email.error}
           />
 
@@ -168,7 +142,7 @@ const RegistrationForm = () => {
             formData={formData.phoneNumber.value}
             handleChange={handleChange}
             name={"phoneNumber"}
-            type={'text'}
+            type={"text"}
             error={formData.phoneNumber.error}
           />
         </Row>
@@ -184,7 +158,6 @@ const RegistrationForm = () => {
             type={"password"}
             error={formData.password.error}
           />
-
 
           <FormInput
             controlId={"formGridConfirmPassword"}
@@ -217,7 +190,6 @@ const RegistrationForm = () => {
             name={"ddlAgeBracket"}
             error={formData.ddlAgeBracket.error}
           />
-
         </Row>
 
         <Row className="mb-2">
