@@ -8,66 +8,100 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { Link } from "react-router-dom";
 import { Axios } from "axios";
+import RegistrationForm from "../components/Form/RegistrationForm";
 
 const Registration = () => {
 
   const [formData, setFormData] = useState({
-    firstName: { value: "", error: "" },
-    lastName: { value: "", error: "" },
+    txtFirstName: { value: "", error: "" },
+    txtLastName: { value: "", error: "" },
     email: { value: "", error: "" },
     password: { value: "", error: "" },
+    confirmPassword: { value: "", error: ""},
     phoneNumber: { value: "", error: "" },
-    gender: { value: "0", error: "" },
-    ageBracket: { value: "0", error: "" },
-    attendantType: { value: "0", error: "" },
-    occupation: { value: "0", error: "" },
+    ddlGender: { value: "0", error: "" },
+    ddlAgeBracket: { value: "0", error: "" },
+    ddlAttendantType: { value: "0", error: "" },
+    ddlOccupation: { value: "0", error: "" },
   });
 
+  const checkVal = ({ name, value }) => {
+    if (name.startsWith("txt")) {
+      if(value.trim().length < 4){
+        return `Invalid ${name.slice(3)}`
+      }
+      return ""
+    }
+    
+    if(name.startsWith("ddl")){
+      if(value === '0'){
+        return `Invalid ${name.slice(3)}`
+      }
+      return ""
+    }
+
+    if(name === "email"){
+      if(value.trim().length < 5 || !value.includes("@") || !value.includes(".")){
+        return `Invalid ${name}`;
+      }
+      return "";
+    }
+
+    if(name === "password"){
+      if(value.trim().length < 6){
+        return `Invalid ${name}`
+      }
+      return "";
+    }
+
+    if(name === "phoneNumber"){
+      if(value.trim().length < 11){
+        return `Invalid ${name}`
+      }
+      return "";
+    }
+
+    if(name === "confirmPassword"){
+      if(value.trim().length < 6){
+       return `Invalid ${name}` 
+      }
+      if(formData.password.value.trim() !== value.trim()){
+        return `Passwords aren't matching`;
+      }
+      return ""
+    }
+
+    return "Unknown Error"
+  }
+
+  
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData({ ...formData, [name]: { ...formData[name], value } });
+    const error = checkVal({ name, value });
+    setFormData({ ...formData, [name]: { ...formData[name], value, error } });
   };
 
   const handleButtonClick = () => {
     let hasError = false;
     const updatedFormData = { ...formData };
 
-    Object.keys(updatedFormData).forEach((key) => {
-      const { value } = updatedFormData[key];
+    Object.keys(updatedFormData).forEach((name) => {
+      const { value } = updatedFormData[name];
 
-      if(key === "email" && !value.includes("@") && !value.includes(".com")){
-        updatedFormData[key].error = "Invalid email";
+      const error = checkVal({name, value});
+      if(error !== ""){
+        updatedFormData[name].error = error;
         hasError = true;
-      }
-      else{
-        updatedFormData[key].error = "";
-      }
-
-      if(key === "phoneNumber" && value.length !== 11){
-        updatedFormData[key].error = "Invalid phone number";
-        hasError = true;
-      }
-      else {
-        updatedFormData[key].error = "";
-      }
-      
-      if(key !== "email" && key !== "phoneNumber"){
-        if (!value.trim() || value === "0") {
-          updatedFormData[key].error = `${key} is required`;
-          hasError = true;
-        } else {
-          updatedFormData[key].error = "";
-        }
+        setFormData(updatedFormData)
       }
     });
 
-    if (hasError) {
-      setFormData(updatedFormData);
+    if(!hasError){
+      const ftDetails = Object.fromEntries(Object.entries(updatedFormData).map(([key, { value }]) => [key, value]));
+      console.log(ftDetails);
+    } else{
       return;
     }
-
-    const ftDetails = Object.fromEntries(Object.entries(updatedFormData).map(([key, { value }]) => [key, value]));
-    console.log(ftDetails);
   };
 
 
@@ -78,18 +112,18 @@ const Registration = () => {
       </div>
       <div className={style.second_half}>
         <h1 className={style.title}>First Timers Registration</h1>
-        <Form>
+        {/* <Form>
           <Row className="mb-4">
             <Form.Group as={Col} controlId="formGridFirstName">
               <Form.Label>First Name</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter First Name"
-                value={formData.firstName.value}
+                value={formData.txtFirstName.value}
                 onChange={handleChange}
-                name={"firstName"}
+                name={"txtFirstName"}
               />
-              {formData.firstName.error.length > 0 ? <p className={style.error}>{formData.firstName.error}</p> : ""}
+              {formData.txtFirstName.error.length > 0 ? <p className={style.error}>{formData.txtFirstName.error}</p> : ""}
             </Form.Group>
 
             <Form.Group as={Col} controlId="formGridLastName">
@@ -97,11 +131,11 @@ const Registration = () => {
               <Form.Control
                 type="text"
                 placeholder="Last Name"
-                value={formData.lastName.value}
+                value={formData.txtLastName.value}
                 onChange={handleChange}
-                name={"lastName"}
+                name={"txtLastName"}
               />
-              {formData.lastName.error.length > 0 ? <p className={style.error}>{formData.lastName.error}</p> : ""}
+              {formData.txtLastName.error.length > 0 ? <p className={style.error}>{formData.txtLastName.error}</p> : ""}
             </Form.Group>
           </Row>
 
@@ -118,19 +152,6 @@ const Registration = () => {
               {formData.email.error.length > 0 ? <p className={style.error}>{formData.email.error}</p> : ""}
             </Form.Group>
 
-            <Form.Group as={Col} controlId="formGridPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Password"
-                value={formData.password.value}
-                onChange={handleChange}
-                name={"password"}
-              />
-              {formData.password.error.length > 0 ? <p className={style.error}>{formData.password.error}</p> : ""}
-            </Form.Group>
-          </Row>
-
           <Form.Group className="mb-4" as={Col} controlId="formGridPhoneNumber">
             <Form.Label>Phone Number</Form.Label>
             <Form.Control
@@ -143,25 +164,54 @@ const Registration = () => {
             {formData.phoneNumber.error.length > 0 ? <p className={style.error}>{formData.phoneNumber.error}</p> : ""}
           </Form.Group>
 
+          </Row>
+
+          <Row>
+          <Form.Group as={Col} className="mb-4" controlId="formGridPassword">
+              <Form.Label>Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Password"
+                value={formData.password.value}
+                onChange={handleChange}
+                name={"password"}
+              />
+              {formData.password.error.length > 0 ? <p className={style.error}>{formData.password.error}</p> : ""}
+            </Form.Group>
+
+            <Form.Group as={Col} controlId="formGridPassword">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control
+                type="password"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword.value}
+                onChange={handleChange}
+                name={"confirmPassword"}
+              />
+              {formData.confirmPassword.error.length > 0 ? <p className={style.error}>{formData.confirmPassword.error}</p> : ""}
+            </Form.Group>
+          </Row>
+
+
           <Row className="mb-4">
             <Form.Group as={Col} controlId="formGridGender">
               <Form.Select
-                value={formData.gender.value}
+                value={formData.ddlGender.value}
                 onChange={handleChange}
-                name={"gender"}
+                name={"ddlGender"}
                 aria-label="Default select example"
               >
                 <option value="0">Gender</option>
                 <option value="1">Male</option>
                 <option value="2">Female</option>
               </Form.Select>
-              {formData.gender.error.length > 0 ? <p className={style.error}>{formData.gender.error}</p> : ""}
+              {formData.ddlGender.error.length > 0 ? <p className={style.error}>{formData.ddlGender.error}</p> : ""}
             </Form.Group>
             <Form.Group as={Col} controlId="formGridAgeBracket">
               <Form.Select
-                value={formData.ageBracket.value}
+                value={formData.ddlAgeBracket.value}
                 onChange={handleChange}
-                name={"ageBracket"}
+                name={"ddlAgeBracket"}
                 aria-label="Default select example"
               >
                 <option value="0">Age Bracket</option>
@@ -169,16 +219,16 @@ const Registration = () => {
                 <option value="2">31 - 50</option>
                 <option value="3">51 - 70</option>
               </Form.Select>
-              {formData.ageBracket.error.length > 0 ? <p className={style.error}>{formData.ageBracket.error}</p> : ""}
+              {formData.ddlAgeBracket.error.length > 0 ? <p className={style.error}>{formData.ddlAgeBracket.error}</p> : ""}
             </Form.Group>
           </Row>
 
           <Row className="mb-4">
             <Form.Group as={Col} controlId="formGridAttendantType">
               <Form.Select
-                value={formData.attendantType.value}
+                value={formData.ddlAttendantType.value}
                 onChange={handleChange}
-                name={"attendantType"}
+                name={"ddlAttendantType"}
                 aria-label="Default select example"
               >
                 <option value="0">Attendant Type</option>
@@ -187,19 +237,19 @@ const Registration = () => {
                 <option value="3">Undecided</option>
                 <option value="4">TCN Member (Another Campus)</option>
               </Form.Select>
-              {formData.attendantType.error.length > 0 ? <p className={style.error}>{formData.attendantType.error}</p> : ""}
+              {formData.ddlAttendantType.error.length > 0 ? <p className={style.error}>{formData.ddlAttendantType.error}</p> : ""}
             </Form.Group>
             <Form.Group as={Col} controlId="formGridOccupation">
               <Form.Select
-                value={formData.occupation.value}
+                value={formData.ddlOccupation.value}
                 onChange={handleChange}
-                name={"occupation"}
+                name={"ddlOccupation"}
                 aria-label="Default select example"
               >
                 <option value="0">Occupation</option>
                 <option value="1">Look up list from the BE</option>
               </Form.Select>
-              {formData.occupation.error.length > 0 ? <p className={style.error}>{formData.occupation.error}</p> : ""}
+              {formData.ddlOccupation.error.length > 0 ? <p className={style.error}>{formData.ddlOccupation.error}</p> : ""}
             </Form.Group>
           </Row>
 
@@ -210,7 +260,9 @@ const Registration = () => {
           </Button>
           <p>Already registered? <Link to="/login">Login</Link></p>
         </div>
-        </Form>
+        </Form> */}
+
+        <RegistrationForm/>
       </div>
     </div>
   );
@@ -218,17 +270,3 @@ const Registration = () => {
 
 export default Registration;
 
-// 1. First Name
-// 2. Last Name
-// 3. Gender
-// 4. Age Bracket
-// 5. Phone number
-// 6. Occupation
-// 7. Attendant Type (New Member, Visiting, Undecided, TCN Member)
-// 8. Attendance Count
-// 9. Status (Integrated , Not Integrated)
-// 10. Date
-
-// What about email?
-// Are we going to be updating the date from the backend?
-// When are they going to input their passwords?
